@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./AnalyticsBackend
+    container_name: analytics_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=ExcelToSqlDB;Trusted_Connection=True;
+    depends_on:
+      - db
+
+  frontend:
+    build: ./analytics-frontend
+    container_name: analytics_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: analytics_db
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
