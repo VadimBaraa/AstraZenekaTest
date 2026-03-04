@@ -1,9 +1,11 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace AnalyticsBackend.Models
 {
     public class Sales
     {
+        [Key]
         public int SaleID { get; set; }
         public int EmployeeID { get; set; }
         public int RegionID { get; set; }

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using AnalyticsBackend.Models;
+using AnalyticsBackend.Data;      
+using AnalyticsBackend.Services;
 
 
 namespace AnalyticsBackend.Data
@@ -16,5 +18,13 @@ namespace AnalyticsBackend.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<MacroTerritory> MacroTerritories { get; set; }
+        public DbSet<EmployeeData> EmployeeData { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EmployeeData>().HasNoKey().ToTable("EmployeeData");
+        }
     }
+
+    
 }

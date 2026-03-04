@@ -1,17 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
+# ── Stage 1: Build ──────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
 
-# Copy csproj(s) and nuget config first (paths relative to build context)
-COPY ["AnalyticsBackend/AnalyticsBackend.csproj", "AnalyticsBackend/"]
-# If you use nuget.config or private feeds:
-# COPY ["nuget.config", "./"]
+# Restore — отдельный слой для кэширования
+COPY AnalyticsBackend/*.csproj ./AnalyticsBackend/
+RUN dotnet restore "AnalyticsBackend/AnalyticsBackend.csproj"
 
-WORKDIR /src/AnalyticsBackend
-RUN dotnet restore "AnalyticsBackend.csproj"
+# Копируем весь проект (Models/ уже внутри AnalyticsBackend/)
+COPY AnalyticsBackend/ ./AnalyticsBackend/
 
-# Now copy the rest of the source
-WORKDIR /src
-COPY . .
+WORKDIR "/app/AnalyticsBackend"
+RUN dotnet publish "AnalyticsBackend.csproj" -c Release -o /app/publish
 
-WORKDIR /src/AnalyticsBackend
-RUN dotnet publish -c Release -o /app/publish
+# ── Stage 2: Runtime ─────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
+
+ENTRYPOINT ["dotnet", "AnalyticsBackend.dll"]
